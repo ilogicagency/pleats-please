@@ -53,3 +53,10 @@ nbproject/
 ## Sql
 #################
 *.sql
+
+
+#################
+## project specific
+#################
+assets/
+src/vid/

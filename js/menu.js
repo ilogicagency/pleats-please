@@ -18,7 +18,7 @@ Menu.prototype =
 	
 	init: function()
 	{
-		var option, space, separator, color_width = 100, color_height = 25;
+		var option, space, separator, color_width = 349, color_height = 25;
 
 		this.container = document.createElement("div");
 		this.container.className = 'gui menu';
@@ -30,7 +30,7 @@ Menu.prototype =
 		this.foregroundColor.width = color_width;
 		this.foregroundColor.height = color_height;
 		this.foregroundColor.className = 'well';
-		this.container.appendChild(this.foregroundColor);
+		//this.container.appendChild(this.foregroundColor);
 		
 		this.setForegroundColor( COLOR );
 		
@@ -83,9 +83,8 @@ Menu.prototype =
 		
 		this.clear = document.createElement("Clear");
 		this.clear.className = 'button restart';
-		this.clear.innerHTML = 'Restart';
-		this.clear.style.marginRight = '50px';
-		this.container.appendChild(this.clear);
+		//this.clear.style.marginRight = '50px';
+		//this.container.appendChild(this.clear);
 
 		this.about = document.createElement("About");
 		this.about.className = 'button';

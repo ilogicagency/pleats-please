@@ -2,17 +2,13 @@ const REV = 6,
        BRUSHES = ["ribbon"],
        USER_AGENT = navigator.userAgent.toLowerCase();
 
-//    SCREEN_WIDTH = window.innerWidth,
-//    SCREEN_HEIGHT = window.innerHeight,
-
-var SCREEN_WIDTH = 1920,
-    SCREEN_HEIGHT = 1080,
+var SCREEN_WIDTH = window.innerWidth,
+    SCREEN_HEIGHT = window.innerHeight,
     BRUSH_SIZE = 1,
     BRUSH_PRESSURE = 1,
     COLOR = [0, 0, 0],
     BACKGROUND_COLOR = [255, 255, 255],
-    STORAGE = null,
-    innerContainer,
+    STORAGE = window.localStorage,
     brush,
     saveTimeOut,
     wacom,
@@ -23,12 +19,8 @@ var SCREEN_WIDTH = 1920,
     foregroundColorSelector,
     backgroundColorSelector,
     menu,
-    timer,
     about,
     canvas,
-    overlay,
-    tools,
-    toolbox,
     flattenCanvas,
     context,
     isFgColorSelectorVisible = false,
@@ -54,11 +46,9 @@ function init()
 	
 	document.body.style.backgroundRepeat = 'no-repeat';
 	document.body.style.backgroundPosition = 'center center';	
-        
-        innerContainer = document.getElementById('studio_container');
 	
 	container = document.createElement('div');
-	innerContainer.appendChild(container);
+	document.body.appendChild(container);
 
 	/*
 	 * TODO: In some browsers a naste "Plugin Missing" window appears and people is getting confused.
@@ -73,40 +63,20 @@ function init()
 	 */
 
 	canvas = document.createElement("canvas");
-        canvas.setAttribute('id', 'canvas');
-        canvas.className = 'main_canvas';
 	canvas.width = SCREEN_WIDTH;
 //	canvas.height = SCREEN_HEIGHT;
-	canvas.style.cursor = 'url(pleatsplease_slices/pleatsplease_bigscreen_creative_cursor_update2.png) 0 0, auto';
-        
-        overlay = document.createElement('img');
-        overlay.src = 'pleatsplease_slices/pleatsplease_bigscreen_creative_blank_bg.png';
-        
-        container.appendChild(canvas);
-        container.appendChild(overlay);
+	canvas.style.cursor = 'url(http://mediazone.ilogic.co.za/comfort_loos/wp-content/themes/Avada/images/icon_titles.png) 0 0, auto';
+	container.appendChild(canvas);
 	
 	flattenCanvas = document.createElement("canvas");
 	flattenCanvas.width = SCREEN_WIDTH;
 	flattenCanvas.height = SCREEN_HEIGHT;
-        
-        toolbox = document.createElement('span');
-        toolbox.className = 'toolbox';
-        toolbox.addEventListener('click', onOpenTools, false);
-        container.appendChild(toolbox);
-        
-        tools = document.createElement('div');
-        tools.className = 'tools';
-        container.appendChild(tools);
 	
 	palette = new Palette();
 	
 	foregroundColorSelector = new ColorSelector(palette);
 	foregroundColorSelector.addEventListener('change', onForegroundColorSelectorChange, false);
-	tools.appendChild(foregroundColorSelector.container);
-        foregroundColorSelector.show();
-        foregroundColorSelector.container.style.left = '49px';
-	foregroundColorSelector.container.style.top = '209px';
-	isFgColorSelectorVisible = true;
+	container.appendChild(foregroundColorSelector.container);
 
 	backgroundColorSelector = new ColorSelector(palette);
 	backgroundColorSelector.addEventListener('change', onBackgroundColorSelectorChange, false);
@@ -115,10 +85,6 @@ function init()
 	var noScroll = function(event) {event.preventDefault()};
 	
 	menu = new Menu();
-        
-        tools.appendChild(menu.clear);
-        tools.appendChild(menu.foregroundColor);
-        
 //	menu.container.addEventListener('touchstart', noScroll, false);
 	menu.container.addEventListener('touchmove', noScroll, false);
 //	menu.container.addEventListener('touchend', noScroll, false);
@@ -140,16 +106,14 @@ function init()
 //	menu.about.addEventListener('touchend', onMenuAbout, false);
 	menu.container.addEventListener('mouseover', onMenuMouseOver, false);
 	menu.container.addEventListener('mouseout', onMenuMouseOut, false);
-	//container.appendChild(menu.container);
+	container.appendChild(menu.container);
         
         timer = new Timer();
-        //timer.startBtn.addEventListener('click', startTimer, false);
         container.appendChild(timer.container);
 	
-//	flattenCanvas.height = canvas.height = SCREEN_HEIGHT - menu.container.offsetHeight;
-        flattenCanvas.height = canvas.height = SCREEN_HEIGHT;
+	flattenCanvas.height = canvas.height = SCREEN_HEIGHT - menu.container.offsetHeight;
 	canvas.style.position = 'absolute';
-	//canvas.style.top = menu.container.offsetHeight+'px';
+	canvas.style.top = menu.container.offsetHeight+'px';
 	context = canvas.getContext("2d");
 
 	if (STORAGE)
@@ -242,7 +206,7 @@ function onWindowResize()
 	SCREEN_HEIGHT = window.innerHeight;
 	
 	menu.container.style.right='0px';
-	//menu.container.style.height=SCREEN_HEIGHT+'px';
+	menu.container.style.height=SCREEN_HEIGHT+'px';
 	
 	about.container.style.left = ((SCREEN_WIDTH - about.container.offsetWidth) / 2) + 'px';
 	about.container.style.top = ((SCREEN_HEIGHT - about.container.offsetHeight) / 2) + 'px';
@@ -413,14 +377,14 @@ function onBackgroundColorSelectorChange( event )
 
 /*function onMenuForegroundColor()
 {
-	cleanPopUps();
+	cleanPopUps();*/
 	
 	foregroundColorSelector.show();
         foregroundColorSelector.container.style.right = '43px';
 	foregroundColorSelector.container.style.top = '32%';
 
 	isFgColorSelectorVisible = true;
-}*/
+//}
 
 function onMenuBackgroundColor()
 {
@@ -468,21 +432,15 @@ function onMenuExportImage()
 
 function onMenuClear()
 {
-	/*if (!confirm("Are you sure?"))
-		return;*/
+	if (!confirm("Are you sure?"))
+		return;
 		
 	context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-        /*timer.reset();
-        timer.countdown();*/
 	saveToLocalStorage();
 
 	brush.destroy();
 	brush = eval("new " + BRUSHES[menu.selector.selectedIndex] + "(context)");
-}
-
-function startTimer() {
-    //timer.countdown();
 }
 
 function onMenuAbout()
@@ -736,24 +694,6 @@ function flatten()
 	context.fillStyle = 'rgb(' + BACKGROUND_COLOR[0] + ', ' + BACKGROUND_COLOR[1] + ', ' + BACKGROUND_COLOR[2] + ')';
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	context.drawImage(canvas, 0, 0);
-}
-
-function onOpenTools() {
-    toolbox.className = 'toolbox active';
-//    jQuery('.tools').animate({'right' : '-176px'});
-    jQuery('.tools').animate({'right' : '64px'});
-    
-    toolbox.removeEventListener('click', onOpenTools, false);
-    toolbox.addEventListener('click', onCloseTools, false);
-}
-
-function onCloseTools() {
-    toolbox.className = 'toolbox';
-//    jQuery('.tools').animate({'right' : '-606px'});
-    jQuery('.tools').animate({'right' : '-349px'});
-    
-    toolbox.removeEventListener('click', onCloseTools, false);
-    toolbox.addEventListener('click', onOpenTools, false);
 }
 
 function cleanPopUps()
